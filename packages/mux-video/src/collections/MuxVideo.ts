@@ -214,7 +214,45 @@ export const MuxVideo = (mux: Mux, pluginOptions: MuxVideoPluginOptions): Collec
                   const token = await mux.jwt.signPlaybackId(playbackId, {
                     expiration: pluginOptions.signedUrlOptions?.expiration ?? '1d',
                     type: 'thumbnail',
-                    params: typeof posterTimestamp === 'number' ? { time: posterTimestamp.toString() } : undefined,
+                    params:
+                      typeof posterTimestamp === 'number'
+                        ? { time: posterTimestamp.toString() }
+                        : undefined,
+                  })
+
+                  url.searchParams.set('token', token)
+                }
+
+                return url.toString()
+              },
+            ],
+          },
+        },
+        {
+          name: 'storyboardUrl',
+          label: 'Storyboard URL',
+          type: 'text',
+          virtual: true,
+          admin: {
+            hidden: true,
+          },
+          hooks: {
+            afterRead: [
+              async ({ data, siblingData }) => {
+                const playbackId = siblingData?.['playbackId']
+
+                if (!playbackId) {
+                  return null
+                }
+
+                const extension = 'png'
+
+                const url = new URL(`https://image.mux.com/${playbackId}/storyboard.${extension}`)
+
+                if (siblingData.playbackPolicy === 'signed') {
+                  const token = await mux.jwt.signPlaybackId(playbackId, {
+                    expiration: pluginOptions.signedUrlOptions?.expiration ?? '1d',
+                    type: 'storyboard',
                   })
 
                   url.searchParams.set('token', token)
@@ -255,7 +293,10 @@ export const MuxVideo = (mux: Mux, pluginOptions: MuxVideoPluginOptions): Collec
                   const token = await mux.jwt.signPlaybackId(playbackId, {
                     expiration: pluginOptions.signedUrlOptions?.expiration ?? '1d',
                     type: 'gif',
-                    params: typeof posterTimestamp === 'number' ? { time: posterTimestamp.toString() } : undefined,
+                    params:
+                      typeof posterTimestamp === 'number'
+                        ? { time: posterTimestamp.toString() }
+                        : undefined,
                   })
 
                   url.searchParams.set('token', token)
